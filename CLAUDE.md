@@ -164,6 +164,25 @@ python tools/voiceover.py --scene-dir public/audio/scenes --json
 # Per-scene with concat for SadTalker narrator
 python tools/voiceover.py --scene-dir public/audio/scenes --concat public/audio/voiceover-concat.mp3
 
+# ── Parallel voiceover with key rotation (VoicePro) ──
+
+# Per-scene with base.txt key pool
+python tools/voiceover_pro.py --scene-dir public/audio/scenes --base base.txt
+
+# With custom voice, speed, threads
+python tools/voiceover_pro.py --scene-dir public/audio/scenes --base base.txt \
+  --voice-id ZthjuvLPty3kTMaNKVKb --speed 1.0 --threads 2
+
+# Single file mode
+python tools/voiceover_pro.py --script SCRIPT.md --output out.mp3 --base base.txt
+
+# With concat + no proxy
+python tools/voiceover_pro.py --scene-dir public/audio/scenes --base base.txt \
+  --concat public/audio/voiceover-concat.mp3 --no-proxy
+
+# Dry run (show plan without API calls)
+python tools/voiceover_pro.py --scene-dir public/audio/scenes --base base.txt --dry-run --json
+
 # Background music
 python tools/music.py --prompt "Subtle corporate" --duration 120 --output music.mp3
 
@@ -183,6 +202,48 @@ python tools/addmusic.py --input video.mp4 --music bg.mp3 --music-volume 0.2 --f
 ```
 
 **SFX Presets:** whoosh, click, chime, error, pop, slide
+
+### VoicePro (Parallel TTS with Key Rotation)
+
+`voiceover_pro.py` is an advanced voiceover tool ported from VoicePro. Use instead of `voiceover.py` when you need parallel processing, key rotation, or proxy support.
+
+**Features:**
+- Parallel generation via ThreadPoolExecutor (default: 2 threads)
+- API key rotation from `base.txt` on quota exhaustion
+- Evomi residential proxy with sticky session rotation
+- Text chunking (≤1500 chars) with sentence-boundary splitting
+- Retry logic: 10 task retries + 5 network retries
+- Resume: skips already-generated files on re-run
+- Silence padding (1.5s) after each chunk
+
+**base.txt format** (one key per line):
+```
+API_KEY:REFRESH_TOKEN
+API_KEY:REFRESH_TOKEN:DD.MM.YYYY
+```
+Keys with a date less than 31 days old are skipped (quota cooldown).
+
+**Proxy setup** (`.env`):
+```
+PROXY_LOGIN=your_login
+PROXY_PASSWORD=your_password
+PROXY_HOST=core-residential.evomi.com
+PROXY_PORT=1000
+```
+
+**Voice defaults:** similarity=0.75, stability=0.39, style=0.0, speed=1.0
+
+**When to use voiceover_pro.py vs voiceover.py:**
+
+| Feature | voiceover.py | voiceover_pro.py |
+|---------|-------------|-----------------|
+| API | Official ElevenLabs SDK | Internal API (Firebase auth) |
+| Keys | Single API key from .env | Key pool from base.txt |
+| Proxy | No | Evomi residential |
+| Parallel | Sequential | ThreadPoolExecutor |
+| Retry | No | 10 task + 5 network |
+| Chunking | Full text | ≤1500 chars |
+| Resume | No | Skips existing files |
 
 ### AI Image Editing (Cloud GPU)
 

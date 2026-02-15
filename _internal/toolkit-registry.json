@@ -140,6 +140,17 @@
       "created": "2025-12-08",
       "updated": "2025-12-08"
     },
+    "voiceover_pro": {
+      "path": "tools/voiceover_pro.py",
+      "description": "Parallel TTS with key rotation, proxy, chunking, retry (VoicePro)",
+      "usage": "python tools/voiceover_pro.py --scene-dir public/audio/scenes --base base.txt",
+      "status": "beta",
+      "features": ["parallel", "key-rotation", "proxy", "chunking", "retry", "resume"],
+      "requires": "base.txt with API keys, optional Evomi proxy credentials in .env",
+      "envVars": ["PROXY_LOGIN", "PROXY_PASSWORD", "PROXY_HOST", "PROXY_PORT", "ELEVENLABS_VOICE_ID"],
+      "created": "2026-02-15",
+      "updated": "2026-02-15"
+    },
     "music": {
       "path": "tools/music.py",
       "description": "Generate background music using ElevenLabs",
